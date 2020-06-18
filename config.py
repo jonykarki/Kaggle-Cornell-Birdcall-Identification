@@ -6,7 +6,7 @@ from easydict import EasyDict as edict
 _C = edict()
 config = _C
 
-_C.BASEPATH = os.path.abspath(os.pardir)
+_C.BASEPATH = "/content"
 
 # Data folders
 _C.DATA = edict()
