@@ -26,13 +26,12 @@ _C.DATA.BASE = os.path.join(_C.BASEPATH, "data")
 _C.DATA.COMP_NAME = "birdsong-recognition"
 _C.DATA.MODELS_OUT = os.path.join(_C.THISPATH, _C.MODEL_OUTPUT_PATH)
 
-def download_kaggle_data():
-    kaggle.api.authenticate()
-    kaggle.api.competition_download_files(
-        _C.DATA.COMP_NAME, path=_C.DATA.BASE, quiet=False)
-    subprocess.call("unzip -q \*.zip", shell=True, cwd=_C.DATA.BASE)
-    subprocess.call("rm *.zip", shell=True, cwd=_C.DATA.BASE)
-
+# def download_kaggle_data():
+#     kaggle.api.authenticate()
+#     kaggle.api.competition_download_files(
+#         _C.DATA.COMP_NAME, path=_C.DATA.BASE, quiet=False)
+#     subprocess.call("unzip -q \*.zip", shell=True, cwd=_C.DATA.BASE)
+#     subprocess.call("rm *.zip", shell=True, cwd=_C.DATA.BASE)
 
 def upload_to_kaggle(slug, title, new=False, msg="new version"):
     meta = {
@@ -54,7 +53,6 @@ def upload_to_kaggle(slug, title, new=False, msg="new version"):
 def init():
     if not os.path.exists(_C.MODEL_OUTPUT_PATH):
         os.makedirs(_C.MODEL_OUTPUT_PATH)
-    download_kaggle_data()
     # subprocess.call(f"python3 -m pip install --upgrade -r requirements.txt", shell=True)
 
 if __name__ == "__main__":
