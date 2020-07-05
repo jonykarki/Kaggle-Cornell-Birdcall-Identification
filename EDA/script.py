@@ -24,6 +24,8 @@ from librosa.core import resample, to_mono
 from tqdm.auto import tqdm
 import IPython.display as ipd
 
+import concurrent.futures
+
 
 # %%
 DATA_DIR = CONFIG.CFG.DATA.BASE
@@ -41,16 +43,8 @@ train_df.shape
 
 
 # %%
-train_sample = train_df[train_df['ebird_code'] == 'linspa'].sample()
-sample_path = train_sample['filepath'].values[0]
-train_sample
-
-
-# %%
-transformed_dict = {
-    "ebird_code": [],
-    "filename": []
-}
+train_sample = train_df[train_df['ebird_code'] == 'aldfly']
+train_sample.shape
 
 
 # %%
@@ -58,17 +52,17 @@ SR = 32000
 D_TIME = 5 # take every 5 seconds
 D_SAMPLE = D_TIME * SR
 SAVE_FOLDER = "../out"
-y_act, sr = librosa.load(sample_path, sr=SR)
-y = y_act[:d_time*SR]
-y.shape, y_act.shape, sr
 
 
 # %%
-for i, row in tqdm(train_df.iterrows(), total=len(train_df)):
+for bird in train_df['ebird_code'].unique():
+    os.makedirs(os.path.join(SAVE_FOLDER, bird), exist_ok=True)
+
+
+# %%
+def save_as_npys(row):
     # read the file
     y, sr = librosa.load(row['filepath'], sr=SR)
-
-    os.makedirs(os.path.join(SAVE_FOLDER, row['ebird_code']), exist_ok=True)
 
     # check the delta time
     if y.shape[0] < D_SAMPLE:
@@ -81,8 +75,6 @@ for i, row in tqdm(train_df.iterrows(), total=len(train_df)):
 
         file_name = f"{SAVE_FOLDER}/{row['ebird_code']}/{row['filename'][:-4]}.npy"
         np.save(file_name, sample_mel_spec)
-        transformed_dict['ebird_code'].append(row['ebird_code'])
-        transformed_dict['filename'].append(file_name.split("/")[-1])
     else:
         # remove the last part that is not D_SAMPLEs
         trunc = y.shape[0] % D_SAMPLE
@@ -100,8 +92,24 @@ for i, row in tqdm(train_df.iterrows(), total=len(train_df)):
 
             np.save(file_name, sample_mel_spec)
 
-            transformed_dict['ebird_code'].append(row['ebird_code'])
-            transformed_dict['filename'].append(file_name.split("/")[-1])
+
+# %%
+rows_series_as_list = []
+for i, j in train_df.iterrows():
+    rows_series_as_list.append(j)
+
+
+# %%
+from multiprocessing.pool import Pool
+
+
+# %%
+with Pool() as p:
+    r = list(tqdm(p.imap(save_as_npys, rows_series_as_list), total=len(rows_series_as_list)))
+
+
+# %%
+
 
 
 # %%
