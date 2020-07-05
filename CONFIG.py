@@ -14,7 +14,7 @@ import kaggle
 from easydict import EasyDict as edict
 
 _C = edict()
-config = _C
+CFG = _C
 
 _C.BASEPATH = "/content"
 _C.THISPATH = os.path.dirname(os.path.abspath(__file__))
